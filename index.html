@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portinaio — l'IA che lavora nel tuo condominio</title>
+<meta name="description" content="Portinaio è l'assistente IA che risponde ai condòmini su WhatsApp, Telegram e web, 24 ore su 24: legge i documenti, consulta il portale dell'amministrazione e apre davvero gli interventi di manutenzione.">
+<meta property="og:title" content="Portinaio — l'IA che lavora nel tuo condominio">
+<meta property="og:description" content="Non un chatbot: un collega. Risponde, verifica, agisce. Su WhatsApp, Telegram e web.">
+<meta name="theme-color" content="#0d1321">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230d1321'/%3E%3Cpath d='M18 50V26l14-11 14 11v24H37V37H27v13z' fill='%23ffb547'/%3E%3Ccircle cx='44' cy='17' r='5' fill='%2337d6b5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0d1321; --ink-2:#151d30; --ink-3:#1e2840; --line:#2a3552;
+  --paper:#f7f4ee; --paper-2:#efe9de; --text:#1b2233; --muted:#5d6578;
+  --on-ink:#e9ecf4; --on-ink-muted:#9aa3ba;
+  --amber:#ffb547; --coral:#ff7a59; --teal:#37d6b5; --violet:#8b7bff;
+  --bubble-in:#ffffff; --bubble-out:#d9fdd3; --chat-bg:#efe7dd;
+  --radius:18px; --max:1180px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Inter,system-ui,sans-serif;background:var(--paper);color:var(--text);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:700;line-height:1.08;letter-spacing:-.02em}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+@media (max-width:600px){.wrap{padding:0 16px}}
+.eyebrow{font:600 12px/1 Inter;letter-spacing:.14em;text-transform:uppercase;color:var(--coral)}
+.mono{font-family:"JetBrains Mono",monospace}
+
+/* NAV */
+nav{position:fixed;inset:0 0 auto 0;z-index:50;transition:background .3s,backdrop-filter .3s}
+nav.scrolled{background:rgba(13,19,33,.82);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.06)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:68px}
+.logo{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font:700 20px Fraunces,serif}
+.logo svg{width:32px;height:32px}
+.navlinks{display:flex;gap:28px;align-items:center}
+.navlinks a{color:var(--on-ink-muted);text-decoration:none;font-size:14px;font-weight:500}
+.navlinks a:hover{color:#fff}
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;cursor:pointer;border-radius:999px;font:600 15px Inter;padding:13px 22px;text-decoration:none;transition:transform .15s,box-shadow .2s,background .2s}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--amber);color:var(--ink);box-shadow:0 8px 30px -8px rgba(255,181,71,.6)}
+.btn-ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.16)}
+.navlinks .btn{padding:9px 16px;font-size:14px;color:var(--ink)}
+@media (max-width:820px){.navlinks a:not(.btn){display:none}}
+
+/* HERO */
+.hero{background:var(--ink);color:var(--on-ink);position:relative;overflow:hidden;padding:140px 0 110px}
+.aurora{position:absolute;inset:-20% -10% auto -10%;height:120%;pointer-events:none;filter:blur(70px);opacity:.55}
+.aurora span{position:absolute;border-radius:50%;animation:float 18s ease-in-out infinite}
+.aurora span:nth-child(1){width:520px;height:520px;background:#ff7a5966;left:-6%;top:6%}
+.aurora span:nth-child(2){width:460px;height:460px;background:#37d6b555;right:4%;top:-4%;animation-delay:-6s}
+.aurora span:nth-child(3){width:380px;height:380px;background:#8b7bff55;left:40%;top:40%;animation-delay:-12s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-30px) scale(1.08)}}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse at 50% 30%,#000 30%,transparent 75%)}
+.hero .wrap{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center}
+@media (max-width:960px){.hero .wrap{grid-template-columns:1fr}.hero{padding:120px 0 80px}}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 14px 6px 8px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);font-size:13px;color:var(--on-ink)}
+.pill b{background:var(--teal);color:var(--ink);border-radius:999px;padding:2px 8px;font-size:11px;letter-spacing:.05em}
+.hero h1{font-size:clamp(42px,6.4vw,78px);margin:22px 0 22px;color:#fff}
+.hero h1 em{font-style:italic;background:linear-gradient(100deg,var(--amber),var(--coral) 60%,var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.lead{font-size:clamp(17px,2vw,20px);color:var(--on-ink-muted);max-width:560px}
+.hero .ctas{display:flex;gap:14px;margin-top:34px;flex-wrap:wrap}
+.channels{display:flex;gap:18px;margin-top:40px;align-items:center;flex-wrap:wrap;color:var(--on-ink-muted);font-size:13px}
+.chan{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--on-ink)}
+.chan i{width:9px;height:9px;border-radius:50%;display:inline-block}
+
+/* PHONE */
+.phone{width:320px;max-width:100%;margin:0 auto;border-radius:44px;padding:12px;background:linear-gradient(145deg,#2b3550,#0a0f1b);box-shadow:0 50px 100px -30px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.08) inset;position:relative}
+.phone .screen{border-radius:34px;overflow:hidden;background:var(--chat-bg);height:600px;display:flex;flex-direction:column;position:relative}
+.phone .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:110px;height:26px;background:#05080f;border-radius:0 0 16px 16px;z-index:3}
+.chat-head{background:#075e54;color:#fff;padding:40px 14px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.chat-head .av{width:36px;height:36px;border-radius:50%;background:var(--amber);display:grid;place-items:center;flex-shrink:0}
+.chat-head .av svg{width:20px;height:20px}
+.chat-head b{display:block;font-size:15px}
+.chat-head small{font-size:12px;opacity:.85}
+.chat-body{flex:1;overflow-y:auto;padding:14px 10px;display:flex;flex-direction:column;gap:6px;scroll-behavior:smooth;background-image:radial-gradient(rgba(0,0,0,.035) 1px,transparent 1px);background-size:14px 14px;scrollbar-width:none}
+.chat-body::-webkit-scrollbar{display:none}
+.msg{max-width:82%;padding:7px 10px 18px;border-radius:10px;font-size:13.5px;line-height:1.42;position:relative;box-shadow:0 1px 1px rgba(0,0,0,.08);white-space:pre-line;animation:pop .28s ease-out both;color:#111b21}
+.msg .t{position:absolute;right:8px;bottom:3px;font-size:10px;color:#667781}
+.msg.in{background:var(--bubble-in);align-self:flex-start;border-top-left-radius:2px}
+.msg.out{background:var(--bubble-out);align-self:flex-end;border-top-right-radius:2px}
+.msg.out .t::after{content:" ✓✓";color:#53bdeb}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+.typing{align-self:flex-start;background:#fff;border-radius:10px;padding:10px 14px;display:flex;gap:4px;animation:pop .2s both}
+.typing i{width:7px;height:7px;border-radius:50%;background:#8696a0;animation:blink 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+.chat-input{display:flex;gap:8px;padding:8px;background:#f0f2f5;flex-shrink:0}
+.chat-input div{flex:1;background:#fff;border-radius:20px;padding:9px 14px;font-size:13px;color:#8696a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-input span{width:36px;height:36px;border-radius:50%;background:#00a884;display:grid;place-items:center;color:#fff;font-size:14px;flex-shrink:0}
+.float-card{position:absolute;background:#fff;color:var(--text);border-radius:14px;padding:12px 14px;box-shadow:0 20px 50px -15px rgba(0,0,0,.5);font-size:12.5px;display:flex;gap:10px;align-items:center;z-index:4;opacity:0;transform:translateY(10px);transition:all .5s cubic-bezier(.2,.8,.2,1)}
+.float-card.show{opacity:1;transform:none}
+.float-card .ic{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;font-size:16px;flex-shrink:0}
+.float-card b{display:block;font-size:13px}
+.float-card small{color:var(--muted)}
+.fc1{left:-70px;top:150px}.fc2{right:-60px;top:330px}.fc3{left:-50px;bottom:70px}
+@media (max-width:1100px){.fc1{left:-20px}.fc2{right:-10px}.fc3{left:-10px}}
+@media (max-width:420px){.float-card{display:none}}
+.phone-wrap{position:relative}
+
+/* STATS */
+.stats{background:var(--ink-2);color:var(--on-ink);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.stats .wrap{display:grid;grid-template-columns:repeat(4,1fr)}
+.stat{padding:34px 20px;border-left:1px solid var(--line)}
+.stat:first-child{border-left:0}
+.stat b{font:700 40px Fraunces,serif;color:#fff;display:block}
+.stat b sup{font-size:18px;color:var(--amber)}
+.stat span{color:var(--on-ink-muted);font-size:14px}
+@media (max-width:760px){.stats .wrap{grid-template-columns:1fr 1fr}.stat:nth-child(3){border-left:0}.stat{border-top:1px solid var(--line)}.stat:nth-child(-n+2){border-top:0}}
+
+section{padding:110px 0}
+@media (max-width:700px){section{padding:76px 0}}
+.sec-head{max-width:720px;margin-bottom:56px}
+.sec-head h2{font-size:clamp(32px,4.4vw,52px);margin:14px 0 16px}
+.sec-head p{font-size:18px;color:var(--muted)}
+
+/* DEMO */
+#demo{background:var(--paper)}
+.tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px}
+.tab{border:1px solid #d9d2c4;background:#fff;color:var(--text);border-radius:999px;padding:10px 16px;font:600 14px Inter;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s}
+.tab:hover{border-color:var(--ink)}
+.tab[aria-selected="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.stage{display:grid;grid-template-columns:340px 1fr;gap:28px;align-items:stretch}
+@media (max-width:900px){.stage{grid-template-columns:1fr}}
+.backstage{background:var(--ink);color:var(--on-ink);border-radius:24px;padding:26px;display:flex;flex-direction:column;min-height:624px;position:relative;overflow:hidden}
+.backstage::before{content:"";position:absolute;right:-120px;top:-120px;width:320px;height:320px;border-radius:50%;background:radial-gradient(#8b7bff44,transparent 70%)}
+.bs-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;position:relative}
+.bs-head h3{font-size:22px;color:#fff}
+.bs-head small{color:var(--on-ink-muted);font-size:13px;display:block;font-family:Inter;font-weight:400;letter-spacing:0;margin-top:4px}
+.live{display:flex;align-items:center;gap:7px;font:600 11px Inter;letter-spacing:.1em;color:var(--teal)}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 0 var(--teal);animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 #37d6b588}100%{box-shadow:0 0 0 10px #37d6b500}}
+.timeline{flex:1;display:flex;flex-direction:column;gap:10px;position:relative}
+.ev{display:grid;grid-template-columns:30px 1fr;gap:12px;animation:pop .35s both}
+.ev .dot{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:14px;background:var(--ink-3);border:1px solid var(--line)}
+.ev.think .dot{background:#8b7bff22;border-color:#8b7bff66}
+.ev.tool .dot{background:#37d6b522;border-color:#37d6b566}
+.ev.guard .dot{background:#ffb54722;border-color:#ffb54766}
+.ev.done .dot{background:#ff7a5922;border-color:#ff7a5966}
+.ev .body{background:var(--ink-2);border:1px solid var(--line);border-radius:12px;padding:10px 13px;font-size:13.5px}
+.ev .body .k{font:500 12px "JetBrains Mono",monospace;color:var(--teal)}
+.ev.think .body .k{color:var(--violet)}
+.ev.guard .body .k{color:var(--amber)}
+.ev.done .body .k{color:var(--coral)}
+.ev .body p{color:var(--on-ink);margin-top:3px}
+.ev .body code{font:12px "JetBrains Mono",monospace;color:var(--on-ink-muted);display:block;margin-top:5px;white-space:pre-wrap;word-break:break-word}
+.ev .spinner{display:inline-block;width:10px;height:10px;border:2px solid var(--teal);border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite;margin-left:6px;vertical-align:-1px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.result{margin-top:16px;background:#fff;color:var(--text);border-radius:16px;padding:16px 18px;display:none;gap:14px;align-items:flex-start;animation:pop .45s both;position:relative}
+.result.show{display:flex}
+.result .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:22px;flex-shrink:0}
+.result b{font-size:15px;display:block}
+.result p{font-size:13.5px;color:var(--muted);margin-top:2px}
+.result .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+.result .meta span{font:500 11.5px "JetBrains Mono",monospace;background:var(--paper-2);padding:3px 8px;border-radius:6px;color:var(--text)}
+.replay{position:absolute;right:18px;bottom:16px;background:transparent;border:1px solid var(--line);color:var(--on-ink-muted);border-radius:999px;padding:7px 13px;font:500 12px Inter;cursor:pointer;display:none}
+.replay.show{display:block}
+.replay:hover{color:#fff;border-color:#fff}
+.bs-empty{color:var(--on-ink-muted);font-size:14px;margin:auto;text-align:center;max-width:280px}
+
+/* HOW */
+.how{background:var(--ink);color:var(--on-ink)}
+.how .sec-head p{color:var(--on-ink-muted)}
+.how h2{color:#fff}
+.flow{display:grid;grid-template-columns:1fr 64px 1.25fr 64px 1fr;align-items:center}
+@media (max-width:900px){.flow{grid-template-columns:1fr}.flow .arrow{transform:rotate(90deg);height:50px}}
+.col{display:flex;flex-direction:column;gap:12px}
+.node{background:var(--ink-2);border:1px solid var(--line);border-radius:16px;padding:16px 18px;display:flex;gap:12px;align-items:center}
+.node .ic{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.node b{color:#fff;display:block;font-size:15px}
+.node small{color:var(--on-ink-muted);font-size:12.5px}
+.brain{border-radius:24px;padding:28px;background:linear-gradient(160deg,#1f2a47,#141b2e);border:1px solid #3a4770;position:relative;overflow:hidden;text-align:center}
+.brain::after{content:"";position:absolute;inset:-1px;border-radius:24px;padding:1px;background:linear-gradient(120deg,var(--amber),var(--coral),var(--violet),var(--teal));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.7}
+.brain .orb{width:86px;height:86px;margin:0 auto 16px;border-radius:50%;background:conic-gradient(from 0deg,var(--amber),var(--coral),var(--violet),var(--teal),var(--amber));animation:spin 9s linear infinite;display:grid;place-items:center}
+.brain .orb::before{content:"";width:68px;height:68px;border-radius:50%;background:#18203a}
+.brain h3{color:#fff;font-size:24px}
+.brain p{color:var(--on-ink-muted);font-size:14px;margin:8px 0 16px}
+.chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
+.chips span{font:500 11.5px "JetBrains Mono",monospace;padding:5px 9px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--on-ink)}
+.arrow{display:flex;align-items:center;justify-content:center;height:100%}
+.arrow svg{width:64px;height:24px;overflow:visible}
+.arrow path{stroke:var(--on-ink-muted);stroke-width:1.5;fill:none;stroke-dasharray:4 5;animation:dash 1.2s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-18}}
+
+/* FEATURES */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media (max-width:900px){.feat-grid{grid-template-columns:1fr 1fr}}
+@media (max-width:600px){.feat-grid{grid-template-columns:1fr}}
+.feat{background:#fff;border:1px solid #e6dfd1;border-radius:var(--radius);padding:28px;transition:transform .25s,box-shadow .25s}
+.feat:hover{transform:translateY(-4px);box-shadow:0 24px 50px -28px rgba(13,19,33,.35)}
+.feat .ic{width:48px;height:48px;border-radius:13px;display:grid;place-items:center;font-size:22px;margin-bottom:18px}
+.feat h3{font-size:22px;margin-bottom:8px}
+.feat p{color:var(--muted);font-size:15px}
+.feat .q{margin-top:14px;font-size:13px;color:var(--text);background:var(--paper);border-radius:10px;padding:8px 11px;font-style:italic}
+.feat.big{grid-column:span 2;background:var(--ink);color:var(--on-ink);border-color:var(--ink);display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center}
+.feat.big h3{color:#fff;font-size:28px}
+.feat.big p{color:var(--on-ink-muted)}
+@media (max-width:900px){.feat.big{grid-column:span 2;grid-template-columns:1fr}}
+@media (max-width:600px){.feat.big{grid-column:span 1}}
+.mini-chats{display:flex;flex-direction:column;gap:8px}
+.mini{display:flex;align-items:center;gap:10px;background:var(--ink-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px}
+.mini i{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.mini span{flex:1;color:var(--on-ink)}
+.mini small{color:var(--on-ink-muted);font-size:11px}
+
+/* TRUST */
+.trust{background:var(--paper-2)}
+.trust-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+@media (max-width:900px){.trust-grid{grid-template-columns:1fr}}
+.rules{display:flex;flex-direction:column;gap:14px}
+.rule{display:grid;grid-template-columns:44px 1fr;gap:16px;background:#fff;border-radius:16px;padding:20px;border:1px solid #e0d8c8}
+.rule .ic{width:44px;height:44px;border-radius:12px;background:var(--ink);display:grid;place-items:center;font-size:19px}
+.rule b{font-size:16px;display:block;margin-bottom:3px}
+.rule p{color:var(--muted);font-size:14.5px}
+.vs{background:#fff;border-radius:20px;border:1px solid #e0d8c8;overflow:hidden}
+.vs table{width:100%;border-collapse:collapse;font-size:14.5px}
+.vs th,.vs td{padding:14px 18px;text-align:left;border-bottom:1px solid #eee6d8;vertical-align:top}
+.vs th{font:600 12px Inter;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--paper)}
+.vs th:last-child{color:var(--coral)}
+.vs td:first-child{color:var(--muted);width:46%}
+.vs td:last-child{font-weight:500}
+.vs tr:last-child td{border-bottom:0}
+
+/* ADMIN */
+.admin-mock{background:var(--ink);border-radius:24px;padding:14px;box-shadow:0 40px 80px -40px rgba(13,19,33,.6)}
+.win-bar{display:flex;gap:7px;padding:6px 8px 14px}
+.win-bar i{width:11px;height:11px;border-radius:50%;background:#3a4560}
+.win-bar i:nth-child(1){background:#ff5f57}.win-bar i:nth-child(2){background:#febc2e}.win-bar i:nth-child(3){background:#28c840}
+.win-bar span{margin-left:14px;font:12px "JetBrains Mono",monospace;color:var(--on-ink-muted)}
+.admin-ui{display:grid;grid-template-columns:180px 1fr;background:#111829;border-radius:14px;overflow:hidden;min-height:380px}
+@media (max-width:700px){.admin-ui{grid-template-columns:1fr}.admin-side{display:none}}
+.admin-side{background:#0b111e;padding:18px 12px;display:flex;flex-direction:column;gap:4px}
+.admin-side a{font-size:13px;color:var(--on-ink-muted);padding:8px 10px;border-radius:8px;text-decoration:none}
+.admin-side a.on{background:var(--ink-3);color:#fff}
+.admin-main{padding:20px;color:var(--on-ink)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.kpi{background:var(--ink-2);border:1px solid var(--line);border-radius:12px;padding:12px}
+.kpi small{color:var(--on-ink-muted);font-size:11.5px}
+.kpi b{display:block;font:700 26px Fraunces,serif;color:#fff}
+.kpi em{font-style:normal;font-size:11.5px;color:var(--teal)}
+.rows{display:flex;flex-direction:column;gap:7px}
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px}
+.row .tag{font:600 10.5px Inter;letter-spacing:.06em;padding:4px 8px;border-radius:6px;text-transform:uppercase}
+.row small{color:var(--on-ink-muted);font-size:11.5px}
+.admin-copy ul{list-style:none;display:flex;flex-direction:column;gap:14px;margin-top:24px}
+.admin-copy li{display:flex;gap:12px;font-size:16px}
+.admin-copy li::before{content:"✦";color:var(--coral);flex-shrink:0}
+
+/* FAQ */
+.faq{max-width:820px}
+details{border-bottom:1px solid #e0d8c8;padding:22px 0}
+summary{cursor:pointer;font:600 18px Inter;list-style:none;display:flex;justify-content:space-between;gap:20px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font:400 26px Inter;line-height:.9;color:var(--coral);transition:transform .2s}
+details[open] summary::after{transform:rotate(45deg)}
+details p{color:var(--muted);margin-top:12px;font-size:16px;max-width:720px}
+
+/* CTA */
+.cta{background:var(--ink);color:#fff;text-align:center;position:relative;overflow:hidden}
+.cta h2{font-size:clamp(36px,5.5vw,64px);max-width:860px;margin:0 auto 20px}
+.cta h2 em{font-style:italic;color:var(--amber)}
+.cta p{color:var(--on-ink-muted);font-size:18px;max-width:600px;margin:0 auto 34px}
+footer{background:#080c16;color:var(--on-ink-muted);padding:34px 0;font-size:13px}
+footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a href="#" class="logo" aria-label="Portinaio">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#1e2840"/><path d="M18 50V26l14-11 14 11v24H37V37H27v13z" fill="#ffb547"/><circle cx="44" cy="17" r="5" fill="#37d6b5"/></svg>
+      Portinaio
+    </a>
+    <div class="navlinks">
+      <a href="#demo">Demo</a>
+      <a href="#come-funziona">Come funziona</a>
+      <a href="#fiducia">Sicurezza</a>
+      <a href="#amministratore">Per l'amministratore</a>
+      <a href="#contatti" class="btn btn-primary">Richiedi una demo</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="wrap">
+    <div>
+      <span class="pill"><b>NUOVO</b> L'IA che agisce, non solo risponde</span>
+      <h1>Il portinaio che <em>non dorme mai.</em></h1>
+      <p class="lead">Portinaio risponde ai condòmini su WhatsApp, Telegram e web, a qualsiasi ora. Legge regolamento e verbali, consulta il portale dell'amministrazione e <strong style="color:#fff">apre davvero gli interventi</strong> con la ditta di manutenzione. Tu ricevi solo quello che serve davvero a te.</p>
+      <div class="ctas">
+        <a href="#demo" class="btn btn-primary">▶ Guarda la magia</a>
+        <a href="#come-funziona" class="btn btn-ghost">Come funziona</a>
+      </div>
+      <div class="channels">
+        <span class="chan"><i style="background:#25d366"></i>WhatsApp</span>
+        <span class="chan"><i style="background:#2aabee"></i>Telegram</span>
+        <span class="chan"><i style="background:var(--amber)"></i>App web installabile</span>
+      </div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone" aria-label="Esempio di conversazione su WhatsApp">
+        <div class="screen">
+          <div class="notch"></div>
+          <div class="chat-head">
+            <div class="av"><svg viewBox="0 0 64 64"><path d="M14 52V24l18-14 18 14v28H38V36H26v16z" fill="#0d1321"/></svg></div>
+            <div><b>Condominio Via dei Glicini</b><small id="hero-status">online</small></div>
+          </div>
+          <div class="chat-body" id="hero-chat"></div>
+          <div class="chat-input"><div>Scrivi un messaggio</div><span>➤</span></div>
+        </div>
+      </div>
+      <div class="float-card fc1" id="fc1"><div class="ic" style="background:#ede9ff">📄</div><div><b>Regolamento, art. 14</b><small>fonte citata nella risposta</small></div></div>
+      <div class="float-card fc2" id="fc2"><div class="ic" style="background:#dcfaf3">🔧</div><div><b>Intervento #2481 creato</b><small>sul gestionale della ditta</small></div></div>
+      <div class="float-card fc3" id="fc3"><div class="ic" style="background:#fff1dc">🔒</div><div><b>Identità verificata</b><small>sul portale dell'amministrazione</small></div></div>
+    </div>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="wrap">
+    <div class="stat"><b>24/7</b><span>risposte immediate, anche a Ferragosto</span></div>
+    <div class="stat"><b>3<sup> canali</sup></b><span>un solo assistente, ovunque scrivano</span></div>
+    <div class="stat"><b>0</b><span>dati personali scritti in chat</span></div>
+    <div class="stat"><b>&lt;1<sup> min</sup></b><span>da "si è rotto il cancello" all'intervento aperto</span></div>
+  </div>
+</div>
+
+<section id="demo">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Demo dal vivo</span>
+      <h2>Guarda cosa succede <em style="font-style:italic;color:var(--coral)">dietro le quinte.</em></h2>
+      <p>A sinistra il condòmino vede una chat normale. A destra vedi il ragionamento: quali documenti legge, quali verifiche fa, quali azioni compie. Scegli una situazione.</p>
+    </div>
+    <div class="tabs reveal" role="tablist" id="tabs"></div>
+    <div class="stage reveal">
+      <div class="phone">
+        <div class="screen">
+          <div class="notch"></div>
+          <div class="chat-head">
+            <div class="av"><svg viewBox="0 0 64 64"><path d="M14 52V24l18-14 18 14v28H38V36H26v16z" fill="#0d1321"/></svg></div>
+            <div><b>Condominio Via dei Glicini</b><small id="demo-status">online</small></div>
+          </div>
+          <div class="chat-body" id="demo-chat"></div>
+          <div class="chat-input"><div id="demo-input">Scrivi un messaggio</div><span>➤</span></div>
+        </div>
+      </div>
+      <div class="backstage">
+        <div class="bs-head">
+          <h3>Dietro le quinte<small id="bs-sub">Il ragionamento dell'assistente, passo per passo</small></h3>
+          <span class="live"><i></i>LIVE</span>
+        </div>
+        <div class="timeline" id="timeline"><p class="bs-empty">Scegli una situazione qui sopra per iniziare.</p></div>
+        <div class="result" id="result"></div>
+        <button class="replay" id="replay">↻ Rivedi</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how" id="come-funziona">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Come funziona</span>
+      <h2>Un cervello, tutti i canali, collegato ai sistemi che usi già.</h2>
+      <p>Portinaio non sostituisce il tuo gestionale: lo usa. Legge i documenti ufficiali, consulta il portale dell'amministrazione e parla con il gestionale della ditta di manutenzione, sempre dentro regole che non può aggirare.</p>
+    </div>
+    <div class="flow reveal">
+      <div class="col">
+        <div class="node"><div class="ic" style="background:#25d36622">💬</div><div><b>WhatsApp</b><small>la chat che usano già tutti</small></div></div>
+        <div class="node"><div class="ic" style="background:#2aabee22">✈️</div><div><b>Telegram</b><small>bot dedicato</small></div></div>
+        <div class="node"><div class="ic" style="background:#ffb54722">📱</div><div><b>App web</b><small>si installa sul telefono</small></div></div>
+      </div>
+      <div class="arrow" aria-hidden="true"><svg viewBox="0 0 64 24"><path d="M2 12h56m-6-6 6 6-6 6"/></svg></div>
+      <div class="brain">
+        <div class="orb" aria-hidden="true"></div>
+        <h3>Il cervello di Portinaio</h3>
+        <p>Un agente IA con competenze dedicate e una guardia di sicurezza che controlla ogni azione.</p>
+        <div class="chips">
+          <span>avvisi</span><span>regolamento</span><span>assemblee</span><span>spese-e-scadenze</span><span>dati-personali</span><span>segnalazione-guasti</span>
+        </div>
+      </div>
+      <div class="arrow" aria-hidden="true"><svg viewBox="0 0 64 24"><path d="M2 12h56m-6-6 6 6-6 6"/></svg></div>
+      <div class="col">
+        <div class="node"><div class="ic" style="background:#8b7bff22">📚</div><div><b>Documenti ufficiali</b><small>regolamento, avvisi, contatti</small></div></div>
+        <div class="node"><div class="ic" style="background:#37d6b522">🏛️</div><div><b>Portale dell'amministrazione</b><small>rate, verbali, circolari, detrazioni</small></div></div>
+        <div class="node"><div class="ic" style="background:#ff7a5922">🔧</div><div><b>Gestionale manutenzione</b><small>interventi reali, con lo stato</small></div></div>
+        <div class="node"><div class="ic" style="background:#ffffff14">✉️</div><div><b>Casella e-mail</b><small>bozze pronte da rivedere</small></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="funzioni">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Cosa sa fare</span>
+      <h2>Le domande di tutti i giorni, risolte da sole.</h2>
+      <p>Gran parte delle telefonate allo studio sono sempre le stesse domande. Portinaio le prende in carico con il tono gentile di una persona di fiducia e passa a te solo quello che richiede davvero l'amministratore.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat big reveal">
+        <div>
+          <div class="ic" style="background:#ffffff14">🧠</div>
+          <h3>Ogni condòmino ha la sua conversazione</h3>
+          <p>Portinaio ricorda il contesto di ogni chat, riconosce chi ha già verificato la propria identità e chiude la conversazione quando il problema è risolto. Cento condòmini insieme? Nessuna attesa.</p>
+        </div>
+        <div class="mini-chats">
+          <div class="mini"><i style="background:#25d366"></i><span>«Il citofono della scala A non va»</span><small>intervento aperto</small></div>
+          <div class="mini"><i style="background:#2aabee"></i><span>«Quando scade la prossima rata?»</span><small>risposto</small></div>
+          <div class="mini"><i style="background:var(--amber)"></i><span>«Si possono stendere i panni fuori?»</span><small>art. 9 citato</small></div>
+          <div class="mini"><i style="background:#25d366"></i><span>«Mi mandi l'estratto conto?»</span><small>e-mail pronta</small></div>
+        </div>
+      </div>
+      <div class="feat reveal">
+        <div class="ic" style="background:#ffe6de">🔧</div>
+        <h3>Guasti → interventi reali</h3>
+        <p>Raccoglie tutti i dettagli, mostra un riepilogo, chiede conferma e apre l'intervento sul gestionale della ditta. Se qualcuno l'ha già segnalato, non crea un doppione.</p>
+        <div class="q">«A che punto è il cancello?»</div>
+      </div>
+      <div class="feat reveal">
+        <div class="ic" style="background:#ede9ff">🏛️</div>
+        <h3>Assemblee spiegate semplici</h3>
+        <p>Trova la convocazione o il verbale giusto nel portale, lo legge per intero e risponde in tre righe. Niente più PDF da 14 pagine.</p>
+        <div class="q">«Cosa si è deciso sulla facciata?»</div>
+      </div>
+      <div class="feat reveal">
+        <div class="ic" style="background:#dcfaf3">📖</div>
+        <h3>Regolamento con la fonte</h3>
+        <p>Animali, rumori, parcheggi, panni stesi: risponde solo in base ai documenti ufficiali e indica sempre l'articolo. Se non lo sa, lo dice.</p>
+        <div class="q">«Posso fare il trapano sabato?»</div>
+      </div>
+      <div class="feat reveal">
+        <div class="ic" style="background:#fff1dc">💶</div>
+        <h3>Rate e conti, in privato</h3>
+        <p>Verifica chi sta scrivendo sul portale, poi prepara un'e-mail con rate, versamenti o detrazioni all'indirizzo registrato in anagrafica. In chat, mai una cifra.</p>
+        <div class="q">«Quanto mi manca da pagare?»</div>
+      </div>
+      <div class="feat reveal">
+        <div class="ic" style="background:#e3f3ff">📣</div>
+        <h3>Avvisi e scadenze</h3>
+        <p>Lavori programmati, chiusura dell'acqua, scadenze delle rate condominiali: le informazioni comuni sempre aggiornate, nel momento in cui servono.</p>
+        <div class="q">«Domani chiudono l'acqua?»</div>
+      </div>
+      <div class="feat reveal">
+        <div class="ic" style="background:#f0f0f0">✉️</div>
+        <h3>Bozze, non invii</h3>
+        <p>Le comunicazioni dello studio finiscono come bozza nella tua casella: le rivedi e le spedisci tu. L'IA prepara, l'umano decide.</p>
+        <div class="q">«Prepara la convocazione di dicembre»</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="trust" id="fiducia">
+  <div class="wrap trust-grid">
+    <div>
+      <div class="sec-head reveal" style="margin-bottom:34px">
+        <span class="eyebrow">Fiducia per progetto</span>
+        <h2>Potente, ma con regole che non può infrangere.</h2>
+        <p>Le regole non sono raccomandazioni nel prompt: sono controlli nel codice. Anche se qualcuno prova a convincerlo, Portinaio non esce dal suo perimetro.</p>
+      </div>
+      <div class="rules">
+        <div class="rule reveal"><div class="ic">🔒</div><div><b>Identità bloccata sulla chat</b><p>Dopo la verifica sul portale, quella chat vede solo i dati di quella persona e di quel condominio. Nessuno può "diventare" un altro. Dopo 5 tentativi sbagliati la verifica si blocca.</p></div></div>
+        <div class="rule reveal"><div class="ic">✉️</div><div><b>Dati personali solo via e-mail</b><p>Importi, saldi e detrazioni vanno all'indirizzo registrato in amministrazione, mai sullo schermo di un telefono lasciato sul tavolo.</p></div></div>
+        <div class="rule reveal"><div class="ic">✅</div><div><b>Conferma prima di ogni azione</b><p>Nessun intervento parte senza un riepilogo approvato dal condòmino. Un tetto giornaliero di segnalazioni per chat ferma gli abusi.</p></div></div>
+        <div class="rule reveal"><div class="ic">🛡️</div><div><b>Zero conservazione dei dati</b><p>Il modello linguistico usa solo fornitori che non conservano i dati. Le password stanno in una cassaforte di segreti, il pannello di controllo non è esposto su internet.</p></div></div>
+        <div class="rule reveal"><div class="ic">📬</div><div><b>Nessun messaggio si perde</b><p>Ogni messaggio passa da una coda persistente. Se un componente si riavvia, la risposta arriva comunque, e mai due volte.</p></div></div>
+      </div>
+    </div>
+    <div class="reveal" style="position:sticky;top:100px">
+      <div class="vs">
+        <table>
+          <thead><tr><th>Un chatbot qualsiasi</th><th>Portinaio</th></tr></thead>
+          <tbody>
+            <tr><td>Risponde con frasi generiche</td><td>Risponde dai tuoi documenti, citando l'articolo</td></tr>
+            <tr><td>«Contatti l'amministratore»</td><td>Apre l'intervento e ti dice a che punto è</td></tr>
+            <tr><td>Un sito in più da visitare</td><td>Vive su WhatsApp, dove i condòmini sono già</td></tr>
+            <tr><td>Chiunque chiede qualsiasi cosa</td><td>Verifica l'identità, poi mostra solo i dati di quella persona</td></tr>
+            <tr><td>Inventa quando non sa</td><td>Dice «non lo trovo nei documenti» e indica chi chiamare</td></tr>
+            <tr><td>Agisce senza controllo</td><td>Prepara, il condòmino conferma, tutto resta tracciato</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="amministratore">
+  <div class="wrap trust-grid" style="align-items:center">
+    <div class="admin-copy reveal">
+      <span class="eyebrow">Per l'amministratore</span>
+      <h2 style="font-size:clamp(32px,4.4vw,52px);margin:14px 0 16px">Meno telefonate.<br>Più controllo.</h2>
+      <p style="font-size:18px;color:var(--muted)">Un pannello riservato ti mostra ogni conversazione, il dettaglio tecnico di ogni risposta e lo stato di ogni canale. Sai sempre cosa ha detto Portinaio, e perché.</p>
+      <ul>
+        <li>Ogni risposta mostra i documenti letti e le azioni compiute</li>
+        <li>Collegamento di WhatsApp con un QR, in un minuto</li>
+        <li>Archivio dei documenti scaricati dal portale, già convertiti in testo</li>
+        <li>Identità dei condòmini azzerabili con un clic</li>
+      </ul>
+    </div>
+    <div class="admin-mock reveal" aria-label="Anteprima del pannello di amministrazione">
+      <div class="win-bar"><i></i><i></i><i></i><span>pannello riservato · conversazioni</span></div>
+      <div class="admin-ui">
+        <div class="admin-side">
+          <a class="on">🏠 Home</a><a>💬 Conversazioni</a><a>🧩 Sessioni</a><a>📄 Documenti</a><a>📱 WhatsApp</a>
+        </div>
+        <div class="admin-main">
+          <div class="kpis">
+            <div class="kpi"><small>Conversazioni oggi</small><b>47</b><em>▲ 12 risolte da sole</em></div>
+            <div class="kpi"><small>Interventi aperti</small><b>6</b><em>2 in lavorazione</em></div>
+            <div class="kpi"><small>E-mail preparate</small><b>9</b><em>tutte consegnate</em></div>
+          </div>
+          <div class="rows">
+            <div class="row"><span class="tag" style="background:#ff7a5926;color:#ff9b80">Guasto</span><span>Cancello carrabile · Via dei Glicini 12<br><small>intervento #2481 · ditta avvisata</small></span><small>09:42</small></div>
+            <div class="row"><span class="tag" style="background:#8b7bff26;color:#b0a6ff">Assemblea</span><span>Sintesi verbale del 10/11<br><small>14 pagine lette · 3 punti riportati</small></span><small>09:31</small></div>
+            <div class="row"><span class="tag" style="background:#ffb54726;color:#ffc66b">Conti</span><span>Rate 2026 · e-mail all'indirizzo registrato<br><small>identità verificata sul portale</small></span><small>09:18</small></div>
+            <div class="row"><span class="tag" style="background:#37d6b526;color:#5fe3c7">Regolamento</span><span>Orari lavori rumorosi<br><small>fonte: regolamento, art. 14</small></span><small>08:57</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background:var(--paper-2)">
+  <div class="wrap">
+    <div class="sec-head reveal"><span class="eyebrow">Domande frequenti</span><h2>Quello che ci chiedono di più.</h2></div>
+    <div class="faq">
+      <details class="reveal"><summary>I condòmini devono installare qualcosa?</summary><p>No. Scrivono su WhatsApp o Telegram come farebbero con un vicino. Chi preferisce può usare l'app web, che si installa sul telefono con un tocco e si apre con un codice del condominio.</p></details>
+      <details class="reveal"><summary>E se l'IA sbaglia o non sa la risposta?</summary><p>Portinaio risponde solo dai documenti ufficiali e dal portale, e cita la fonte. Quando l'informazione non c'è lo dice chiaramente e indica i recapiti dello studio. Le azioni (interventi, e-mail) partono solo dopo un riepilogo confermato, e le comunicazioni dello studio restano bozze finché non le invii tu.</p></details>
+      <details class="reveal"><summary>Come protegge i dati personali?</summary><p>L'identità viene verificata sul portale dell'amministrazione e resta bloccata su quella chat. I dati economici non compaiono mai in chat: arrivano per e-mail all'indirizzo registrato in anagrafica. Il modello IA usa solo fornitori a conservazione zero, e i segreti sono custoditi in una cassaforte dedicata.</p></details>
+      <details class="reveal"><summary>Funziona con il mio gestionale?</summary><p>Portinaio si collega ai sistemi tramite connettori dedicati: oggi supporta un portale dell'amministrazione per condòmini e un gestionale per gli interventi di manutenzione. Nuovi connettori si aggiungono senza toccare il resto.</p></details>
+      <details class="reveal"><summary>Dove gira?</summary><p>Su un server dello studio o in cloud, in container indipendenti: se un canale si ferma gli altri continuano a funzionare, e nessun messaggio va perso.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="cta" id="contatti">
+  <div class="aurora" aria-hidden="true" style="opacity:.35"><span></span><span></span><span></span></div>
+  <div class="wrap" style="position:relative">
+    <span class="eyebrow">Portinaio</span>
+    <h2 style="margin-top:16px">Dai ai tuoi condòmini un assistente <em>che c'è sempre.</em></h2>
+    <p>Ti mostriamo Portinaio sui documenti del tuo condominio, su WhatsApp, in venti minuti.</p>
+    <div class="ctas" style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <a class="btn btn-primary" href="https://github.com/mastrogiovanni" target="_blank" rel="noopener">Richiedi una demo →</a>
+      <a class="btn btn-ghost" href="#demo">Rivedi la demo</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Portinaio · Assistente IA per condomini</span>
+    <span>Nomi, indirizzi e dati negli esempi sono di fantasia.</span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const sleep = ms => new Promise(r => setTimeout(r, reduce ? Math.min(ms, 60) : ms));
+  const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  const fmt = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  let clock = 9 * 60 + 40;
+  const time = () => { clock++; return String(Math.floor(clock/60)).padStart(2,'0') + ':' + String(clock%60).padStart(2,'0'); };
+
+  // Nav background on scroll
+  const nav = document.getElementById('nav');
+  addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 30), {passive:true});
+
+  // Reveal on scroll
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  function makeChat(bodyEl, statusEl) {
+    return {
+      clear() { bodyEl.innerHTML = ''; },
+      add(side, text) {
+        const d = document.createElement('div');
+        d.className = 'msg ' + side;
+        d.innerHTML = fmt(text) + '<span class="t">' + time() + '</span>';
+        bodyEl.appendChild(d);
+        bodyEl.scrollTop = bodyEl.scrollHeight;
+      },
+      typing(on) {
+        const ex = bodyEl.querySelector('.typing');
+        if (on && !ex) { const t = document.createElement('div'); t.className = 'typing'; t.innerHTML = '<i></i><i></i><i></i>'; bodyEl.appendChild(t); bodyEl.scrollTop = bodyEl.scrollHeight; }
+        if (!on && ex) ex.remove();
+        if (statusEl) statusEl.textContent = on ? 'sta scrivendo…' : 'online';
+      }
+    };
+  }
+
+  // ---------- HERO loop ----------
+  const hero = makeChat(document.getElementById('hero-chat'), document.getElementById('hero-status'));
+  const heroScript = [
+    ['out', 'Posso fare il trapano sabato pomeriggio? 🔨'],
+    ['in',  'Sì, dalle **15:30 alle 18:30** ✅\nIl sabato i lavori rumorosi sono ammessi anche la mattina, dalle 9 alle 12. Domenica e festivi no (Regolamento, art. 14).', 'fc1'],
+    ['out', 'Grazie! Ah, il cancello delle auto non si apre da stamattina 😩'],
+    ['in',  'Che seccatura! Lo segnalo subito alla ditta. Ti confermo i dati che ho già: Giulia Bianchi, scala B int. 7, Via dei Glicini 12. Lo invio?'],
+    ['out', 'Sì grazie'],
+    ['in',  'Fatto ✅ **Intervento n. 2481** aperto con la ditta di manutenzione. Scrivimi «a che punto è?» quando vuoi.', 'fc2'],
+    ['out', 'Ultima cosa: quanto mi manca da pagare quest\'anno?'],
+    ['in',  'Ti ho mandato rate e scadenze per e-mail, all\'indirizzo che risulta in amministrazione (g••••••@gmail.com) 📩\nPer la tua privacy gli importi non li scrivo mai in chat 🔒', 'fc3'],
+  ];
+  async function heroLoop() {
+    while (true) {
+      hero.clear();
+      ['fc1','fc2','fc3'].forEach(id => document.getElementById(id).classList.remove('show'));
+      await sleep(700);
+      for (const [side, text, card] of heroScript) {
+        if (side === 'in') { hero.typing(true); await sleep(1300 + text.length * 9); hero.typing(false); }
+        else await sleep(900);
+        hero.add(side, text);
+        if (card) document.getElementById(card).classList.add('show');
+        await sleep(side === 'in' ? 1500 : 500);
+      }
+      await sleep(4500);
+    }
+  }
+  heroLoop();
+
+  // ---------- DEMO scenarios ----------
+  // Steps: u = user message, b = bot message, e = backstage event [kind, key, text, code?]
+  const scenarios = {
+    guasto: {
+      label: '🔧 Guasto al cancello',
+      steps: [
+        {u: 'Ciao! Il cancello carrabile non si apre da stamattina 😩 Non riesco a uscire con la macchina'},
+        {e: ['think', 'comprensione', 'Guasto in una parte comune: cancello. Carico la guida giusta.', 'read skills/segnalazione-guasti']},
+        {e: ['guard', 'verifica competenza', 'I cancelli rientrano tra i guasti che posso segnalare alla ditta ✓']},
+        {e: ['tool', 'stato_segnalazioni', 'Cerco interventi già aperti per questo cancello…', '→ nessun intervento aperto uguale']},
+        {b: 'Che seccatura, mi dispiace! Lo segnalo subito alla ditta di manutenzione 🔧\nMi dici condominio, nome e cognome, scala e interno e un numero di telefono per il tecnico?'},
+        {u: 'Via dei Glicini 12, Giulia Bianchi, scala B interno 7. 333 123 4567'},
+        {e: ['think', 'redazione', 'Scrivo io la descrizione del danno e preparo il riepilogo da confermare.']},
+        {b: 'Ecco il riepilogo:\n🔧 Cancello carrabile bloccato: non si apre col telecomando\n📍 Via dei Glicini 12, ingresso auto\n👤 Giulia Bianchi, scala B int. 7\n📞 333 123 4567\n\nLo invio alla ditta?'},
+        {u: 'Sì, grazie!'},
+        {e: ['guard', 'conferma ricevuta', 'Il condòmino ha approvato il riepilogo. Limite giornaliero: 1 di 3 ✓']},
+        {e: ['tool', 'segnala_guasto', 'Creo l\'intervento sul gestionale della ditta…', 'categoria: cancelli · referente: G. Bianchi\n→ intervento #2481 creato']},
+        {b: 'Fatto ✅ Ho aperto l\'**intervento n. 2481** con la ditta di manutenzione.\nQuando vuoi, scrivimi «a che punto è?» e ti dico lo stato.'},
+        {e: ['done', 'conversazione chiusa', 'Obiettivo raggiunto. La storia resta salvata.']},
+      ],
+      result: {ic: '🔧', bg: '#ffe6de', title: 'Intervento #2481 aperto', text: 'Creato davvero sul gestionale della ditta di manutenzione, con referente e telefono. Nessuna telefonata allo studio.', meta: ['cancelli', 'priorità normale', 'ditta avvisata']}
+    },
+    assemblea: {
+      label: '🏛️ Cosa si è deciso in assemblea?',
+      steps: [
+        {u: 'Non sono riuscita ad andare all\'assemblea di ieri, cosa avete deciso?'},
+        {e: ['think', 'comprensione', 'Domanda su un\'assemblea. Ogni condominio ha i suoi verbali: serve sapere quale.', 'read skills/verbali-assemblee']},
+        {e: ['guard', 'identità', 'Chat già verificata: Giulia Bianchi · Via dei Glicini 12 🔒']},
+        {e: ['tool', 'portale_documenti', 'Cerco nell\'archivio del portale dell\'amministrazione…', 'cartella: Assemblee/2026\n→ verbale_assemblea_10-11-2026.pdf (14 pagine)']},
+        {e: ['tool', 'leggi_documento', 'Scarico il verbale e lo converto in testo…', '→ 14 pagine · 5 punti all\'ordine del giorno']},
+        {e: ['think', 'sintesi', 'Riassumo le delibere con i numeri esatti, senza interpretare.']},
+        {b: 'Ecco cosa si è deciso nell\'assemblea del **10 novembre** 📋\n\n1️⃣ **Rendiconto 2025**: approvato all\'unanimità\n2️⃣ **Facciata**: approvato il rifacimento, preventivo di 186.000 €, lavori da marzo 2027\n3️⃣ **Pulizie scale**: dal 1° dicembre passano a martedì e venerdì\n\nVuoi che ti spieghi meglio uno dei punti?'},
+        {u: 'Come si pagherà la facciata?'},
+        {e: ['tool', 'leggi_documento', 'Rileggo il punto 2 del verbale.', '→ "ripartizione per millesimi di proprietà, in 6 rate"']},
+        {b: 'Sarà divisa in base ai **millesimi di proprietà**, in **6 rate** a partire da gennaio 2027 (verbale del 10/11, punto 2). Il piano con la tua quota arriverà dall\'amministrazione 📩'},
+        {e: ['done', 'risposta con fonte', 'Ogni affermazione viene dal verbale originale.']},
+      ],
+      result: {ic: '🏛️', bg: '#ede9ff', title: '14 pagine → 4 righe', text: 'Il verbale giusto, preso dall\'archivio ufficiale del condominio della persona, letto per intero e riassunto con i punti esatti.', meta: ['fonte: portale', 'verbale 10/11/2026', 'punto 2 citato']}
+    },
+    conti: {
+      label: '💶 Quanto devo pagare?',
+      steps: [
+        {u: 'Quanto mi manca da pagare quest\'anno?'},
+        {e: ['think', 'comprensione', 'Dati personali: prima devo sapere chi sta scrivendo.', 'read skills/dati-personali']},
+        {b: 'Così controllo subito: mi dici nome, cognome e indirizzo del condominio? 😊'},
+        {u: 'Giulia Bianchi, via dei Glicini 12'},
+        {e: ['tool', 'identifica_condomino', 'Verifico sul portale dell\'amministrazione…', 'nome: Giulia Bianchi · condominio: Via dei Glicini 12\n→ 1 corrispondenza esatta']},
+        {e: ['guard', 'identità bloccata', 'Da ora questa chat vede solo i dati di Giulia Bianchi, in questo condominio 🔒']},
+        {e: ['tool', 'portale_rate', 'Leggo rate emesse e versamenti…', '→ 2 rate ancora da pagare']},
+        {e: ['tool', 'prepara_email_dati_personali', 'Preparo l\'e-mail con il dettaglio, all\'indirizzo in anagrafica.', '→ destinatario: g••••••@gmail.com']},
+        {b: 'Fatto! Ti ho mandato il riepilogo di rate e scadenze per e-mail, all\'indirizzo che risulta in amministrazione: **g••••••@gmail.com** 📩\nPer la tua privacy gli importi non li scrivo mai in chat 🔒'},
+        {u: 'Dai, dimmi almeno il totale'},
+        {e: ['guard', 'regola di privacy', 'Richiesta di dati personali in chat: non consentita, anche se il condòmino insiste.']},
+        {b: 'Ti capisco! Ma i dati economici viaggiano solo per e-mail: se il telefono resta sul tavolo, nessuno li legge 😉 Trovi tutto già nella tua casella.'},
+        {e: ['done', 'dati protetti', 'Nessuna cifra mostrata in chat.']},
+      ],
+      result: {ic: '🔒', bg: '#fff1dc', title: 'E-mail pronta, zero cifre in chat', text: 'Identità verificata sul portale e bloccata su questa chat. Il dettaglio arriva solo all\'indirizzo registrato in anagrafica.', meta: ['identità verificata', 'g••••••@gmail.com', 'privacy rispettata']}
+    },
+    regolamento: {
+      label: '📖 Posso fare il trapano?',
+      steps: [
+        {u: 'Posso usare il trapano sabato pomeriggio? Devo montare delle mensole'},
+        {e: ['think', 'comprensione', 'Domanda sul regolamento: orari di quiete.', 'read skills/regolamento']},
+        {e: ['tool', 'read', 'Cerco nel regolamento del condominio…', 'documenti/regolamento.md\n→ art. 14 "Quiete e lavori rumorosi"']},
+        {e: ['think', 'verifica', 'Controllo sia il sabato sia la domenica, per anticipare la prossima domanda.']},
+        {b: 'Sì! Il sabato i lavori rumorosi sono ammessi **dalle 9 alle 12 e dalle 15:30 alle 18:30** ✅\nDomenica e festivi invece no.\n\n📖 Regolamento di condominio, art. 14'},
+        {u: 'E se il vicino fa rumore di notte?'},
+        {e: ['tool', 'read', 'Rileggo l\'articolo e controllo i contatti.', '→ art. 14, comma 2 · contatti.md']},
+        {b: 'Dalle 22 alle 7 va rispettato il silenzio (art. 14, comma 2). Ti consiglio prima di parlarne con gentilezza; se continua, puoi scrivere all\'amministratore: ti lascio i recapiti dello studio 📇'},
+        {e: ['done', 'risposta con fonte', 'Solo dai documenti ufficiali: niente invenzioni.']},
+      ],
+      result: {ic: '📖', bg: '#dcfaf3', title: 'Risposta con l\'articolo', text: 'Solo dai documenti ufficiali del condominio, con la fonte. Se un\'informazione non c\'è, Portinaio lo dice e indica chi contattare.', meta: ['regolamento.md', 'art. 14', 'contatti.md']}
+    }
+  };
+
+  const tabsEl = document.getElementById('tabs');
+  const timeline = document.getElementById('timeline');
+  const resultEl = document.getElementById('result');
+  const replay = document.getElementById('replay');
+  const demoInput = document.getElementById('demo-input');
+  const demo = makeChat(document.getElementById('demo-chat'), document.getElementById('demo-status'));
+  const icons = {think: '✦', tool: '⚙', guard: '🛡', done: '✓'};
+  let runId = 0, current = null, started = false;
+
+  Object.entries(scenarios).forEach(([key, sc], i) => {
+    const b = document.createElement('button');
+    b.className = 'tab'; b.setAttribute('role', 'tab'); b.textContent = sc.label; b.dataset.key = key;
+    b.setAttribute('aria-selected', 'false');
+    b.onclick = () => run(key);
+    tabsEl.appendChild(b);
+  });
+
+  async function typeInput(text, id) {
+    demoInput.style.color = '#111b21';
+    for (let i = 1; i <= text.length; i += 2) {
+      if (id !== runId) return;
+      demoInput.textContent = text.slice(0, i);
+      await sleep(18);
+    }
+    demoInput.textContent = text;
+    await sleep(250);
+    demoInput.textContent = 'Scrivi un messaggio'; demoInput.style.color = '';
+  }
+
+  function addEvent([kind, key, text, code]) {
+    const ex = timeline.querySelector('.bs-empty'); if (ex) ex.remove();
+    timeline.querySelectorAll('.spinner').forEach(s => s.remove());
+    const ev = document.createElement('div');
+    ev.className = 'ev ' + kind;
+    ev.innerHTML = `<div class="dot">${icons[kind]}</div><div class="body"><span class="k">${esc(key)}</span>${kind === 'tool' ? '<span class="spinner"></span>' : ''}<p>${esc(text)}</p>${code ? `<code>${esc(code)}</code>` : ''}</div>`;
+    timeline.appendChild(ev);
+    while (timeline.children.length > 7) timeline.firstElementChild.remove();
+    return ev;
+  }
+
+  async function run(key) {
+    const id = ++runId; current = key;
+    tabsEl.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', t.dataset.key === key));
+    const sc = scenarios[key];
+    demo.clear(); demo.typing(false);
+    timeline.innerHTML = ''; resultEl.className = 'result'; replay.classList.remove('show');
+    clock = 9 * 60 + 40;
+    await sleep(400);
+    for (const s of sc.steps) {
+      if (id !== runId) return;
+      if (s.u) { await typeInput(s.u, id); if (id !== runId) return; demo.add('out', s.u); await sleep(600); }
+      else if (s.e) {
+        demo.typing(true);
+        const ev = addEvent(s.e);
+        await sleep(s.e[0] === 'tool' ? 1500 : 1000);
+        ev.querySelectorAll('.spinner').forEach(x => x.remove());
+      } else if (s.b) {
+        demo.typing(true); await sleep(700 + Math.min(s.b.length * 6, 1400));
+        if (id !== runId) return;
+        demo.typing(false); demo.add('in', s.b); await sleep(1200);
+      }
+    }
+    if (id !== runId) return;
+    demo.typing(false);
+    const r = sc.result;
+    resultEl.innerHTML = `<div class="ic" style="background:${r.bg}">${r.ic}</div><div><b>${esc(r.title)}</b><p>${esc(r.text)}</p><div class="meta">${r.meta.map(m => `<span>${esc(m)}</span>`).join('')}</div></div>`;
+    resultEl.className = 'result show';
+    replay.classList.add('show');
+  }
+  replay.onclick = () => run(current);
+
+  // Start the first scenario when the demo scrolls into view
+  new IntersectionObserver((es, o) => { if (es[0].isIntersecting && !started) { started = true; run('guasto'); o.disconnect(); } }, {threshold:.3})
+    .observe(document.getElementById('demo'));
+})();
+</script>
+</body>
+</html>
