@@ -181,6 +181,19 @@ section{padding:110px 0}
 .brain p{color:var(--on-ink-muted);font-size:14px;margin:8px 0 16px}
 .chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
 .chips span{font:500 11.5px "JetBrains Mono",monospace;padding:5px 9px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--on-ink)}
+.integr{margin-top:56px;padding:28px 30px;border-radius:22px;background:var(--ink-2);border:1px solid var(--line);display:grid;grid-template-columns:1.1fr 2fr;gap:28px;align-items:center}
+@media (max-width:900px){.integr{grid-template-columns:1fr;padding:24px 20px}}
+.integr h3{color:#fff;font-size:22px;margin:8px 0 6px}
+.integr p{color:var(--on-ink-muted);font-size:14px;margin:0}
+.integr-list{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media (max-width:700px){.integr-list{grid-template-columns:1fr}}
+.partner{display:block;text-decoration:none;padding:16px 18px;border-radius:16px;background:var(--ink-3);border:1px solid var(--line);transition:border-color .2s}
+a.partner:hover{border-color:var(--teal)}
+.partner .st{display:inline-flex;align-items:center;gap:6px;font:600 11px Inter;letter-spacing:.04em;text-transform:uppercase;color:var(--teal)}
+.partner .st::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.partner.soon .st{color:var(--amber)}
+.partner b{display:block;color:#fff;font-size:17px;margin:8px 0 2px}
+.partner small{color:var(--on-ink-muted);font-size:12.5px}
 .arrow{display:flex;align-items:center;justify-content:center;height:100%}
 .arrow svg{width:64px;height:24px;overflow:visible}
 .arrow path{stroke:var(--on-ink-muted);stroke-width:1.5;fill:none;stroke-dasharray:4 5;animation:dash 1.2s linear infinite}
@@ -310,6 +323,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
         <span class="chan"><i style="background:#2aabee"></i>Telegram</span>
         <span class="chan"><i style="background:var(--amber)"></i>App web installabile</span>
       </div>
+      <p style="margin-top:18px;font-size:14px;color:var(--on-ink-muted)">✅ Già integrato con <a href="https://www.cedhousesuite.com/" target="_blank" rel="noopener" style="color:#fff">CedHouse Suite</a> e <a href="https://www.gestendo.it/" target="_blank" rel="noopener" style="color:#fff">Gestendo</a>. Altri gestionali in arrivo.</p>
     </div>
     <div class="phone-wrap">
       <div class="phone" aria-label="Esempio di conversazione su WhatsApp">
@@ -377,7 +391,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
     <div class="sec-head reveal">
       <span class="eyebrow">Come funziona</span>
       <h2>Un cervello, tutti i canali, collegato ai sistemi che usi già.</h2>
-      <p>Portinaio non sostituisce il tuo gestionale: lo usa. Legge i documenti ufficiali, consulta il portale dell'amministrazione e parla con il gestionale della ditta di manutenzione, sempre dentro regole che non può aggirare.</p>
+      <p>Portinaio non sostituisce il tuo gestionale: lo usa. Legge i documenti ufficiali, consulta il portale dell'amministrazione e parla con il gestionale della ditta di manutenzione, sempre dentro regole che non può aggirare. È <strong style="color:#fff">già integrato con CedHouse Suite e Gestendo</strong>.</p>
     </div>
     <div class="flow reveal">
       <div class="col">
@@ -397,9 +411,21 @@ footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
       <div class="arrow" aria-hidden="true"><svg viewBox="0 0 64 24"><path d="M2 12h56m-6-6 6 6-6 6"/></svg></div>
       <div class="col">
         <div class="node"><div class="ic" style="background:#8b7bff22">📚</div><div><b>Documenti ufficiali</b><small>regolamento, avvisi, contatti</small></div></div>
-        <div class="node"><div class="ic" style="background:#37d6b522">🏛️</div><div><b>Portale dell'amministrazione</b><small>rate, verbali, circolari, detrazioni</small></div></div>
-        <div class="node"><div class="ic" style="background:#ff7a5922">🔧</div><div><b>Gestionale manutenzione</b><small>interventi reali, con lo stato</small></div></div>
+        <div class="node"><div class="ic" style="background:#37d6b522">🏛️</div><div><b>Portale dell'amministrazione</b><small>CedHouse Suite · rate, verbali, circolari</small></div></div>
+        <div class="node"><div class="ic" style="background:#ff7a5922">🔧</div><div><b>Gestionale manutenzione</b><small>Gestendo · interventi reali, con lo stato</small></div></div>
         <div class="node"><div class="ic" style="background:#ffffff14">✉️</div><div><b>Casella e-mail</b><small>bozze pronte da rivedere</small></div></div>
+      </div>
+    </div>
+    <div class="integr reveal" id="integrazioni">
+      <div>
+        <span class="eyebrow">Integrazioni</span>
+        <h3>Già collegato ai gestionali che usi.</h3>
+        <p>Nessuna migrazione: Portinaio lavora direttamente sui tuoi dati. Molti altri sistemi sono in fase di integrazione.</p>
+      </div>
+      <div class="integr-list">
+        <a class="partner" href="https://www.cedhousesuite.com/" target="_blank" rel="noopener"><span class="st">Integrato</span><b>CedHouse Suite</b><small>gestionale e portale per l'amministrazione condominiale</small></a>
+        <a class="partner" href="https://www.gestendo.it/" target="_blank" rel="noopener"><span class="st">Integrato</span><b>Gestendo</b><small>gestionale per interventi e manutenzioni</small></a>
+        <div class="partner soon"><span class="st">In integrazione</span><b>Molti altri</b><small>nuovi connettori in sviluppo: chiedici del tuo</small></div>
       </div>
     </div>
   </div>
@@ -442,7 +468,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
         <div class="ic" style="background:#dcfaf3">📖</div>
         <h3>Regolamento con la fonte</h3>
         <p>Animali, rumori, parcheggi, panni stesi: risponde solo in base ai documenti ufficiali e indica sempre l'articolo. Se non lo sa, lo dice.</p>
-        <div class="q">«Posso fare il trapano sabato?»</div>
+        <div class="q">«Posso usare il trapano sabato?»</div>
       </div>
       <div class="feat reveal">
         <div class="ic" style="background:#fff1dc">💶</div>
@@ -544,7 +570,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
       <details class="reveal"><summary>I condòmini devono installare qualcosa?</summary><p>No. Scrivono su WhatsApp o Telegram come farebbero con un vicino. Chi preferisce può usare l'app web, che si installa sul telefono con un tocco e si apre con un codice del condominio.</p></details>
       <details class="reveal"><summary>E se l'IA sbaglia o non sa la risposta?</summary><p>Portinaio risponde solo dai documenti ufficiali e dal portale, e cita la fonte. Quando l'informazione non c'è lo dice chiaramente e indica i recapiti dello studio. Le azioni (interventi, e-mail) partono solo dopo un riepilogo confermato, e le comunicazioni dello studio restano bozze finché non le invii tu.</p></details>
       <details class="reveal"><summary>Come protegge i dati personali?</summary><p>L'identità viene verificata sul portale dell'amministrazione e resta bloccata su quella chat. I dati economici non compaiono mai in chat: arrivano per e-mail all'indirizzo registrato in anagrafica. Il modello IA usa solo fornitori a conservazione zero, e i segreti sono custoditi in una cassaforte dedicata.</p></details>
-      <details class="reveal"><summary>Funziona con il mio gestionale?</summary><p>Portinaio si collega ai sistemi tramite connettori dedicati: oggi supporta un portale dell'amministrazione per condòmini e un gestionale per gli interventi di manutenzione. Nuovi connettori si aggiungono senza toccare il resto.</p></details>
+      <details class="reveal"><summary>Funziona con il mio gestionale?</summary><p>Portinaio è già integrato con <a href="https://www.cedhousesuite.com/" target="_blank" rel="noopener">CedHouse Suite</a> per l'amministrazione condominiale e con <a href="https://www.gestendo.it/" target="_blank" rel="noopener">Gestendo</a> per gli interventi di manutenzione. Molti altri sistemi sono in fase di integrazione: se usi un gestionale diverso, scrivici e lo mettiamo in lista.</p></details>
       <details class="reveal"><summary>Dove gira?</summary><p>Su un server dello studio o in cloud, in container indipendenti: se un canale si ferma gli altri continuano a funzionare, e nessun messaggio va perso.</p></details>
     </div>
   </div>
@@ -609,7 +635,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
   // ---------- HERO loop ----------
   const hero = makeChat(document.getElementById('hero-chat'), document.getElementById('hero-status'));
   const heroScript = [
-    ['out', 'Posso fare il trapano sabato pomeriggio? 🔨'],
+    ['out', 'Posso usare il trapano sabato pomeriggio? 🔨'],
     ['in',  'Sì, dalle **15:30 alle 18:30** ✅\nIl sabato i lavori rumorosi sono ammessi anche la mattina, dalle 9 alle 12. Domenica e festivi no (Regolamento, art. 14).', 'fc1'],
     ['out', 'Grazie! Ah, il cancello delle auto non si apre da stamattina 😩'],
     ['in',  'Che seccatura! Lo segnalo subito alla ditta. Ti confermo i dati che ho già: Giulia Bianchi, scala B int. 7, Via dei Glicini 12. Lo invio?'],
@@ -694,7 +720,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
       result: {ic: '🔒', bg: '#fff1dc', title: 'E-mail pronta, zero cifre in chat', text: 'Identità verificata sul portale e bloccata su questa chat. Il dettaglio arriva solo all\'indirizzo registrato in anagrafica.', meta: ['identità verificata', 'g••••••@gmail.com', 'privacy rispettata']}
     },
     regolamento: {
-      label: '📖 Posso fare il trapano?',
+      label: '📖 Posso usare il trapano?',
       steps: [
         {u: 'Posso usare il trapano sabato pomeriggio? Devo montare delle mensole'},
         {e: ['think', 'comprensione', 'Domanda sul regolamento: orari di quiete.', 'read skills/regolamento']},
